@@ -1,0 +1,47 @@
+# import the data frame
+data <- data.frame(
+  X1_Cl  = c(2.2, 2.1, 1.52, 2.88, 2.18, 1.87, 1.52, 2.37, 2.06, 1.84, 1.89, 
+            2.45, 1.88, 1.93, 1.8, 1.81, 1.49, 1.53, 1.43, 1.54),
+  X2_PO4 = c(0.417, 0.354, 0.208, 0.335, 0.314, 0.271, 0.164, 0.302,0.373, 
+             0.265, 0.192, 0.221, 0.186, 0.207, 0.157, 0.195, 0.165, 0.226, 
+             0.224,0.271),
+  X3_K = c(1.35, 0.9, 0.71, 0.9, 1.26, 1.15, 0.83, 0.89, 0.79, 0.72, 
+           0.46, 0.76, 0.52, 0.6, 0.67, 0.47, 0.66, 0.68, 0.44, 0.51),
+  X4_Na = c(1.79, 1.08, 0.47, 1.48, 1.09, 0.99, 0.85, 0.94, 0.8, 0.77, 
+            0.46, 0.95, 0.95, 0.92, 0.6, 0.57, 0.8, 0.66, 0.45,0.95),
+  Y_force = c(351, 249, 171, 373, 321, 191, 225, 291, 284, 213, 
+              138, 213, 151, 130, 93, 95, 147, 88, 65, 120)
+)
+
+
+intercept <- -184.32258
+coef_x1 <- 97.44433
+coef_x2 <- 275.31120
+coef_x3 <- 139.86357
+coef_x4 <- 19.29971
+
+# Actual values of Y_force
+Y_actual <- data$Y_force
+
+# Predicted values from the model
+data$Y_pred <- intercept + 
+              coef_x1 * data$X1_Cl + 
+              coef_x2* data$X2_PO4 +
+              coef_x3 * data$X3_K + 
+              coef_x4 * data$X4_Na
+
+# Calculate residuals
+data$residuals <- data$Y_force - data$Y_pred
+
+# Plotting the residuals
+plot(data$Y_pred, data$residuals,
+     xlab = "Predicted Values (Y_pred)",
+     ylab = "Residuals",
+     main = "Residual Plot",
+     pch = 19,                 
+     col = "blue")  
+
+abline(h = 0, col = "red", lty = 2)  # Red dashed line at y = 0
+
+axis(2, at = seq(-70, 90, by = 20), labels = seq(-70, 90, by = 20))
+
