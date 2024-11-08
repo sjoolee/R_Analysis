@@ -1,0 +1,66 @@
+T <- 0.0125
+Ts <- 0.005
+stroke_vol <- 70e-3
+Tmax <- 0.002
+Qmax <- (stroke_vol/(0.5*Ts))
+dt <- 0.01*0.0125
+Csa <- 0.00175
+Rs <- 17.86
+
+flow_rate <- function(t, T=0.0125, Tmax=0.002, Ts=0.005, Qmax=28) {
+  t_mod <- t %% T
+  
+  if (0 <= t_mod && t_mod <= Tmax) {
+    return(Qmax * (t_mod / Tmax))
+  } else if (Tmax < t_mod && t_mod <= Ts) {
+    return(Qmax * (Ts - t_mod) / (Ts - Tmax))
+  } else {
+    return(0)
+  }
+}
+
+dP_sa_dt <- function(t, P_sa_current) {
+  Q_Ao <- flow_rate(t)
+  return ((1/Csa)*(Q_Ao - P_sa_current/Rs))
+}
+
+runge_kutta <- function(f,t,y,dt){
+  k1 <- f(t,y)
+  k2 <- f(t+dt/2, y+k1*dt/2)
+  k3 <- f(t+dt/2, y+k2*dt/2)
+  k4 <- f(t+dt, y+k3*dt)
+  return (y+(dt/6)*(k1+2*k2+2*k3+k4))
+}
+
+t_start <- 0
+t_end <- 1
+P_sa_initial <- 0
+dt <- 0.01
+
+t <- seq(t_start, t_end, by = dt)
+
+P_sa <- numeric(length(t))
+Q_Ao <- numeric(length(t))
+
+P_sa_current <- P_sa_initial
+
+
+for (i in seq_along(t)) {
+  P_sa[i] <- P_sa_current
+  Q_Ao[i] <- flow_rate(t[i])
+  
+  # Update P_sa_current using Runge-Kutta function (to be defined separately)
+  P_sa_current <- runge_kutta(dP_sa_dt, t[i], P_sa_current, dt)
+}
+
+par(mfrow = c(2,1))
+
+# Plot Q_Ao (Flow Rate over Time)
+plot(t[1:(length(t) %/% 5)], Q_Ao[1:(length(t) %/% 5)], type = "l", 
+     main = "Flow Rate over Time", xlab = "Time (min)", ylab = "Flow Rate (L/min)", col = "blue")
+grid()
+
+# Plot P_sa (Systemic Arterial Pressure over Time)
+plot(t[1:(length(t) %/% 5)], P_sa[1:(length(t) %/% 5)], type = "l", 
+     main = "Systemic Arterial Pressure over Time", xlab = "Time (min)", ylab = "Pressure (mmHg)", col = "red")
+grid()
